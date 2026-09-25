@@ -13,18 +13,18 @@
 | MCP key / product | Binary / path (default under `%CPC_ROOT%`) | Required where |
 |---|---|---|
 | `cpc-hands` | `servers/hands.exe` | All Toolbelt clients (MCP) |
-| **Cache** (product) | Path via `CPC_CACHE` (default suggest `C:\CPC\cache`) | All clients — **v1: path + skills only, no MCP wire** |
+| **Cache** (product) | Path via `CPC_CACHE` (default suggest `C:\\CPC\\cache`) | All clients — **v1: path + skills only, no MCP wire** |
 | `cpc-voice` | `servers/voice.exe` | Optional |
 | `cpc-workflow` | `servers/workflow.exe` | Optional |
 | `cpc-manager` | `servers/manager.exe` (Beta) | Optional |
 | `cpc-programmer` | `servers/programmer.exe` | **Claude Desktop pack only** by default |
 
 ## Binary truth (reference BEE, 2026-09-25)
-Present under `C:\CPC\servers\\`: `hands.exe`, `voice.exe`, `workflow.exe`, `manager.exe`, `programmer.exe`.
-**No** `autocache.exe`. Cache directory `C:\CPC\cache` exists. Do not invent a Cache MCP binary for v1.
+Present under `C:\\CPC\\servers\\\\`: `hands.exe`, `voice.exe`, `workflow.exe`, `manager.exe`, `programmer.exe`.
+**No** `autocache.exe`. Cache directory `C:\\CPC\\cache` exists. Do not invent a Cache MCP binary for v1.
 
 ## Cache v1 rule (locked)
-- Collect and store `CPC_CACHE` (suggest `C:\CPC\cache`)
+- Collect and store `CPC_CACHE` (suggest `C:\\CPC\\cache`)
 - Skills / hooks / AGENTS: prefer Cache before network when an asset may be cached
 - Do **not** add `cpc-cache` to `mcp.json` until a real Cache MCP binary exists
 - Deferred wire example kept only as `mcp.cache.example.json` / labeled deferred
@@ -54,3 +54,9 @@ Present under `C:\CPC\servers\\`: `hands.exe`, `voice.exe`, `workflow.exe`, `man
 ## Freemium
 Free core capabilities (Hands, Cache path, Voice, Workflow, Manager Beta, Programmer) may ship free.
 **Do not** sell or name this pack as “autonomous” — that remains a separate wedge.
+
+## Transport: stdio vs shared-host HTTP
+
+- **Plugin / free-pack default (v1):** stdio — `${CPC_ROOT}/servers/<name>.exe` (Cursor `mcp.json`, Grok `mcp-snippets/`).
+- **Optional advanced:** shared-host HTTP when the `cpc` shared-mcp daemon is already running on the machine. Port map (owner-verified BEE): hands 7772, local 7773, manager 7774, workflow 7775, voice 7776 (may be cold), programmer 7777, ops 7778, stocks 7779. Autonomous **7771** is paid-wedge only — **never** include in free Toolbelt wire examples. See `mcp.shared-http.example.json` (example shape only; HTTP path must match local Cursor `mcp.json` on the daemon host — do not invent `/sse`).
+
