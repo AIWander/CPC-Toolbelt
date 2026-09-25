@@ -101,6 +101,7 @@ for (const script of [
   'hooks/cache_first_prompt.js',
   'hooks/cache_before_mcp.js',
   'hooks/stop_doctor_nudge.js',
+  'scripts/toolbelt-doctor.mjs',
 ]) {
   mustExist(script);
 }
@@ -149,6 +150,79 @@ for (const [script, stdin] of [
   } catch {
     errors.push(script + ' did not emit JSON: ' + r.stdout);
   }
+}
+
+// Doctor: path verdict is JSON `ok`. Process exit stays 0 (fail-open).
+{
+  const os = await import('os');
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'toolbelt-doctor-'));
+  const servers = path.join(fixture, 'servers');
+  const cacheDir = path.join(fixture, 'cache');
+  fs.mkdirSync(servers, { recursive: true });
+  fs.mkdirSync(cacheDir, { recursive: true });
+  fs.writeFileSync(path.join(servers, 'hands.exe'), '');
+  const doctor = path.join(root, 'scripts', 'toolbelt-doctor.mjs');
+  const good = spawnSync(process.execPath, [doctor], {
+    encoding: 'utf8',
+    timeout: 5000,
+    env: { ...process.env, CPC_ROOT: fixture, CPC_CACHE: cacheDir },
+  });
+  if (good.status !== 0) errors.push('toolbelt-doctor.mjs exited ' + good.status + ' on a good fixture');
+  let goodJson = null;
+  try {
+    goodJson = JSON.parse((good.stdout || '').trim());
+  } catch {
+    errors.push('toolbelt-doctor.mjs did not emit JSON on a good fixture');
+  }
+  if (goodJson) {
+    if (goodJson.ok !== true) errors.push('toolbelt-doctor.mjs ok should be true when paths exist');
+    if (goodJson.shared_host?.probe?.status !== 'skipped') {
+      errors.push('toolbelt-doctor.mjs should skip 7772 when shared-mcp is absent');
+    }
+    if (goodJson.shared_host?.probe?.port !== 7772) {
+      errors.push('toolbelt-doctor.mjs probe port must stay 7772');
+    }
+  }
+
+  fs.mkdirSync(path.join(fixture, 'shared-mcp'), { recursive: true });
+  const shared = spawnSync(process.execPath, [doctor], {
+    encoding: 'utf8',
+    timeout: 5000,
+    env: { ...process.env, CPC_ROOT: fixture, CPC_CACHE: cacheDir },
+  });
+  if (shared.status !== 0) errors.push('toolbelt-doctor.mjs exited ' + shared.status + ' when probing 7772');
+  let sharedJson = null;
+  try {
+    sharedJson = JSON.parse((shared.stdout || '').trim());
+  } catch {
+    errors.push('toolbelt-doctor.mjs did not emit JSON for the shared-host probe');
+  }
+  if (sharedJson) {
+    if (sharedJson.ok !== true) errors.push('a 7772 probe must not fail path checks');
+    const st = sharedJson.shared_host?.probe?.status;
+    if (st !== 'open' && st !== 'closed') {
+      errors.push('shared-host probe status must be open or closed, got ' + st);
+    }
+  }
+
+  const bad = spawnSync(process.execPath, [doctor], {
+    encoding: 'utf8',
+    timeout: 5000,
+    env: {
+      ...process.env,
+      CPC_ROOT: path.join(fixture, 'missing-root'),
+      CPC_CACHE: path.join(fixture, 'missing-cache'),
+    },
+  });
+  if (bad.status !== 0) errors.push('toolbelt-doctor.mjs must fail-open (exit 0) when paths are missing');
+  try {
+    const badJson = JSON.parse((bad.stdout || '').trim());
+    if (badJson.ok !== false) errors.push('toolbelt-doctor.mjs ok should be false when paths are missing');
+  } catch {
+    errors.push('toolbelt-doctor.mjs did not emit JSON when paths are missing');
+  }
+
+  fs.rmSync(fixture, { recursive: true, force: true });
 }
 
 const result = { root, errors, warnings, ok: errors.length === 0 };

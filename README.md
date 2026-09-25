@@ -54,8 +54,12 @@ See `mcp.shared-http.example.json`. Prefer stdio for plugin v1.
 
 ## Related
 
+<<<<<<< HEAD
 - Lane map: [`RELATIONSHIP.md`](./RELATIONSHIP.md)
 
+=======
+- Lane map (Suite, this plugin, Grok, protocol): [RELATIONSHIP.md](RELATIONSHIP.md)
+>>>>>>> f7af622 (doctor: fail-open checks for CPC_ROOT, hands.exe, CPC_CACHE, and optional 7772)
 - Grok install layer: [CPC-Toolbelt-Grok](https://github.com/AIWander/CPC-Toolbelt-Grok) (sibling repo)
 - Protocol skills (separate): [GrokCLI](https://github.com/AIWander/GrokCLI) — install alongside if you want both
 - Human tour: [StartHERE](https://github.com/AIWander/StartHERE)
