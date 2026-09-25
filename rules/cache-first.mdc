@@ -1,0 +1,13 @@
+---
+description: Prefer CPC_CACHE before network fetches
+alwaysApply: true
+---
+
+Before downloading or fetching skills, files, logos, binaries, or other assets:
+
+1. Read `CPC_CACHE` (default `C:\CPC\cache`).
+2. Check the Cache directory for an existing copy.
+3. Prefer the local copy when suitable.
+4. Only then use network / browser / installers.
+
+There is no `cpc-cache` MCP in v1. Soft hooks reinforce this; they never block tools.

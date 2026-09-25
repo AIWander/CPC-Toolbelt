@@ -1,0 +1,15 @@
+{
+  "_comment": "DEFERRED — NOT FOR V1. Do not merge into mcp.json until a real Cache MCP binary exists. Cache v1 = CPC_CACHE path + skills/hooks only. Reference BEE had no autocache.exe.",
+  "mcpServers": {
+    "cpc-cache": {
+      "command": "${CPC_ROOT}/servers/REPLACE_WITH_DISCOVERED_CACHE_SERVER.exe",
+      "args": [
+        "--root",
+        "${CPC_CACHE}"
+      ],
+      "env": {
+        "CPC_CACHE": "${CPC_CACHE}"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+---
+description: CPC Toolbelt freemium and naming guardrails
+alwaysApply: true
+---
+
+CPC Toolbelt gives Cursor local tools (Hands MCP, Cache path, optional Voice/Workflow/Manager).
+
+- Prefer Cache (`CPC_CACHE`, default suggest `C:\CPC\cache`) before network for skills and assets.
+- Cache v1 is path + skills only — no `cpc-cache` MCP server.
+- Never describe Toolbelt or Hands as autonomous, unattended, or hands-off.
+- User-facing name for the cache product is Cache.
+- Do not auto-install or auto-enable Programmer in Cursor; Claude Desktop owns that default.
+- Manager is Beta; say so when enabling it.

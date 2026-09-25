@@ -1,0 +1,17 @@
+{
+  "_comment": "Merge opted servers only. Binary names verified on reference BEE CPC install.",
+  "mcpServers": {
+    "cpc-voice": {
+      "command": "${CPC_ROOT}/servers/voice.exe",
+      "args": []
+    },
+    "cpc-workflow": {
+      "command": "${CPC_ROOT}/servers/workflow.exe",
+      "args": []
+    },
+    "cpc-manager": {
+      "command": "${CPC_ROOT}/servers/manager.exe",
+      "args": []
+    }
+  }
+}
