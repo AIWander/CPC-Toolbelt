@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node ${CURSOR_PLUGIN_ROOT}/hooks/session_start.js"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "node ${CURSOR_PLUGIN_ROOT}/hooks/cache_first_prompt.js"
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "node ${CURSOR_PLUGIN_ROOT}/hooks/cache_before_mcp.js"
+      }
+    ],
+    "stop": [
+      {
+        "command": "node ${CURSOR_PLUGIN_ROOT}/hooks/stop_doctor_nudge.js",
+        "loop_limit": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "cpc-toolbelt",
+  "displayName": "CPC Toolbelt",
+  "version": "0.1.0",
+  "description": "Tools Cursor reaches for when you ask — Hands MCP plus Cache path skills/hooks, with optional Voice, Workflow, and Manager.",
+  "author": {
+    "name": "AIwander",
+    "email": "contact@aiwander.ai"
+  },
+  "homepage": "https://aiwander.ai",
+  "repository": "https://github.com/AIWander/CPC-Toolbelt",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cpc",
+    "mcp",
+    "hands",
+    "cache",
+    "toolbelt",
+    "aiwander"
+  ],
+  "logo": "assets/logo.svg",
+  "hooks": "./hooks/hooks.json",
+  "variables": {
+    "type": "object",
+    "properties": {
+      "CPC_ROOT": {
+        "type": "string",
+        "title": "CPC install root",
+        "description": "Windows path to CPC root (default C:\\\\CPC)",
+        "default": "C:\\\\CPC"
+      },
+      "CPC_CACHE": {
+        "type": "string",
+        "title": "Cache path",
+        "description": "Local Cache directory (v1 path + skills only; default C:\\\\CPC\\\\cache)",
+        "default": "C:\\\\CPC\\\\cache"
+      }
+    },
+    "required": [
+      "CPC_ROOT",
+      "CPC_CACHE"
+    ]
+  }
+}

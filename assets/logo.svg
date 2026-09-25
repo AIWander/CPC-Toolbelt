@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="CPC Toolbelt">
+  <rect width="128" height="128" rx="24" fill="#0B1220"/>
+  <path d="M28 70h72v12H28z" fill="#5B8CFF"/>
+  <path d="M36 52h16v36H36zM56 44h16v44H56zM76 56h16v32H76z" fill="#A8C5FF"/>
+  <circle cx="96" cy="40" r="10" fill="#FFB020"/>
+</svg>
