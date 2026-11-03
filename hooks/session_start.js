@@ -3,8 +3,10 @@
 /**
  * sessionStart — CPC Toolbelt
  * Fail-open. Cursor sessionStart: additional_context + env.
+ * Fills HANDS_HOME and CPC_CACHE only when unset, using runtime resolution.
  */
 const fs = require('fs');
+const { resolveToolbeltPaths } = require('../scripts/resolve-paths.cjs');
 
 function readInput() {
   try {
@@ -24,19 +26,23 @@ function readInput() {
 function main() {
   try {
     readInput();
-    const cpcRoot = process.env.CPC_ROOT || 'C:\\CPC';
-    const cpcCache = process.env.CPC_CACHE || 'C:\\CPC\\cache';
+    const resolved = resolveToolbeltPaths();
     const missingHints = [];
-    if (!process.env.CPC_ROOT) missingHints.push('CPC_ROOT unset (default C:\\CPC)');
-    if (!process.env.CPC_CACHE) missingHints.push('CPC_CACHE unset (default C:\\CPC\\cache)');
+    if (resolved.home.source === 'default') {
+      missingHints.push('HANDS_HOME and CPC_ROOT unset; using the per-user Hands directory');
+    }
+    if (resolved.cache.source === 'default') {
+      missingHints.push('CPC_CACHE unset; using <Hands home>/cache');
+    }
 
     const lines = [
       'CPC Toolbelt is active.',
-      'Prefer the Cache path (CPC_CACHE) before downloading skills, files, or assets.',
-      'Hands (cpc-hands) is the wired MCP server for this pack.',
+      'On first use, run the getting-started skill and call hands_setup_status before other Hands tools.',
+      'Prefer the Cache path (CPC_CACHE, or <Hands home>/cache) before downloading skills, files, or assets.',
+      'Hands (cpc-hands) is the wired MCP server for this pack. It is stdio.',
       'Do not brand Toolbelt or Hands as autonomous, unattended, or hands-off.',
       'Cache v1 is path + skills only — there is no cpc-cache MCP server in mcp.json.',
-      'If CPC_ROOT or CPC_CACHE look wrong, run the toolbelt-doctor skill.',
+      'If the Hands home or Cache path looks wrong, run the toolbelt-doctor skill.',
     ];
     if (missingHints.length) {
       lines.push('Hint: ' + missingHints.join('; ') + '.');
@@ -44,10 +50,8 @@ function main() {
 
     const ctx = lines.join(' ');
     const env = {};
-    if (process.env.CPC_ROOT) env.CPC_ROOT = process.env.CPC_ROOT;
-    else env.CPC_ROOT = cpcRoot;
-    if (process.env.CPC_CACHE) env.CPC_CACHE = process.env.CPC_CACHE;
-    else env.CPC_CACHE = cpcCache;
+    if (!process.env.HANDS_HOME) env.HANDS_HOME = resolved.home.path;
+    if (!process.env.CPC_CACHE) env.CPC_CACHE = resolved.cache.path;
 
     const payload = {
       additional_context: ctx,

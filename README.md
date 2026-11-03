@@ -9,53 +9,52 @@ Cursor marketplace-ready plugin. This repository **root** is the plugin (not a n
 
 | Piece | How it ships (v1) |
 |---|---|
-| Hands | Required MCP: `cpc-hands` → `%CPC_ROOT%\servers\\hands.exe` |
-| Cache | Path `CPC_CACHE` (suggest `C:\CPC\cache`) + skills/hooks — **no MCP** |
-| Voice / Workflow / Manager | Optional — merge from `mcp.optionals.example.json` |
+| Hands | Required stdio MCP: `cpc-hands` → `${HANDS_HOME}/servers/hands.exe` |
+| Cache | Path `CPC_CACHE`, or `<Hands home>/cache` when that variable is unset. Skills and hooks only — **no MCP** |
+| Voice / Workflow / Manager | Optional stdio — merge from `mcp.optionals.example.json` |
 | Programmer | **Never** default on Cursor — `add-programmer` skill only if asked |
 
 Do **not** brand as autonomous.
 
+## Paths
+
+Resolved when a hook or `scripts/toolbelt-doctor.mjs` runs. Nothing in this repo points at one person's machine.
+
+1. **Hands home:** `HANDS_HOME` if set, else `CPC_ROOT` (older installs), else `%LOCALAPPDATA%\AIWander\Hands`. When `LOCALAPPDATA` is unset, that is the current user's application-data directory plus `AIWander/Hands`.
+2. **Cache:** `CPC_CACHE` if set, else `<Hands home>/cache`.
+3. **Binaries:** `<Hands home>/servers/<name>.exe`.
+
+`CPC_ROOT` and `CPC_CACHE` are back-compat environment overrides. Leave them empty on a new install.
+
 ## Install (local / marketplace)
 
 1. Install or open this plugin in Cursor.
-2. Set plugin variables `CPC_ROOT` (default `C:\CPC`) and `CPC_CACHE` (default `C:\CPC\cache`).
-3. Confirm `cpc-hands` appears under Available Tools.
-4. Run the `toolbelt-setup` skill (or `/toolbelt-setup` command).
-5. Optionally enable Voice / Workflow / Manager via `enable-optional`.
+2. Run the `getting-started` skill (or `/getting-started`). It calls `hands_setup_status` before anything else.
+3. Set the `HANDS_HOME` plugin variable to the resolved directory so `${HANDS_HOME}` expands. Leave it empty only if the host resolves the default itself. Set `CPC_CACHE` only when Cache should not live under that home.
+4. Confirm `cpc-hands` appears under Available Tools.
+5. Run `toolbelt-setup` if you still need optional Voice / Workflow / Manager.
+
+Do not paste an absolute path back into this repository. If the host cannot expand variables, write the resolved stdio command only into the user's private MCP config.
 
 ## Layout
 
 - `.cursor-plugin/plugin.json` — manifest
-- `mcp.json` — Hands only
+- `mcp.json` — Hands only (stdio)
 - `hooks/` — Cursor hooks (`sessionStart`, cache-first, stop nudge)
 - `skills/`, `rules/`, `commands/`, `assets/`
 
+## MCP transport
 
-## Shared-host MCP (optional)
+Every MCP server shipped here is **stdio**. See `mcp.json` and `mcp.optionals.example.json`. Commands use `${HANDS_HOME}` (filled at install time) or, for files that live in the plugin, a plugin-root variable such as `${CURSOR_PLUGIN_ROOT}`.
 
-Plugin **v1 default** is **stdio**: `${CPC_ROOT}/servers/*.exe` (see `mcp.json` / `mcp.optionals.example.json`).
-
-On machines that already run the `cpc` shared-mcp daemon, you may instead point Cursor at localhost ports. Owner-verified BEE port map (do **not** invent HTTP paths — copy the real endpoint from that machine’s Cursor `mcp.json`):
-
-| Service | Port | Free Toolbelt? |
-|---|---|---|
-| autonomous | 7771 | **No** — paid wedge; never wire into free examples |
-| hands | 7772 | Yes (required) |
-| local | 7773 | Host lane (not a Toolbelt free-pack default) |
-| manager | 7774 | Optional |
-| workflow | 7775 | Optional |
-| voice | 7776 | Optional (may be cold) |
-| programmer | 7777 | Directed only |
-| ops | 7778 | Host lane |
-| stocks | 7779 | Host lane |
-
-See `mcp.shared-http.example.json`. Prefer stdio for plugin v1.
+This pack does not publish a shared-host port map. Remote use, when you need it, is a private tunnel you sign into yourself. The `getting-started` skill walks through that. There is no public link by default.
 
 ## Related
 
-- Lane map (Suite, this plugin, Grok, protocol): [`RELATIONSHIP.md`](./RELATIONSHIP.md)
-- Grok install layer: [CPC-Toolbelt-Grok](https://github.com/AIWander/CPC-Toolbelt-Grok) (sibling repo)
+- Lane map: [`RELATIONSHIP.md`](./RELATIONSHIP.md)
+- Grok install layer: [CPC-Toolbelt-Grok](https://github.com/AIWander/CPC-Toolbelt-Grok)
+- Claude install layer: [CPC-Toolbelt-Claude](https://github.com/AIWander/CPC-Toolbelt-Claude)
+- Codex install layer: [CPC-Toolbelt-Codex](https://github.com/AIWander/CPC-Toolbelt-Codex)
 - Protocol skills (separate): [GrokCLI](https://github.com/AIWander/GrokCLI) — install alongside if you want both
 - Human tour: [StartHERE](https://github.com/AIWander/StartHERE)
 - Signed installers: [CPC-Suite](https://github.com/AIWander/CPC-Suite)

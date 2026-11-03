@@ -1,7 +1,8 @@
 {
   "mcpServers": {
     "cpc-hands": {
-      "command": "${CPC_ROOT}/servers/hands.exe",
+      "type": "stdio",
+      "command": "${HANDS_HOME}/servers/hands.exe",
       "args": []
     }
   }

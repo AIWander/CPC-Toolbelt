@@ -10,53 +10,57 @@
 
 ## Components
 
-| MCP key / product | Binary / path (default under `%CPC_ROOT%`) | Required where |
+| MCP key / product | Binary / path under the Hands home | Required where |
 |---|---|---|
-| `cpc-hands` | `servers/hands.exe` | All Toolbelt clients (MCP) |
-| **Cache** (product) | Path via `CPC_CACHE` (default suggest `C:\\CPC\\cache`) | All clients — **v1: path + skills only, no MCP wire** |
+| `cpc-hands` | `servers/hands.exe` | All Toolbelt clients (stdio MCP) |
+| **Cache** (product) | `CPC_CACHE`, or `<Hands home>/cache` | All clients — **v1: path + skills only, no MCP wire** |
 | `cpc-voice` | `servers/voice.exe` | Optional |
 | `cpc-workflow` | `servers/workflow.exe` | Optional |
 | `cpc-manager` | `servers/manager.exe` (Beta) | Optional |
 | `cpc-programmer` | `servers/programmer.exe` | **Claude Desktop pack only** by default |
 
-## Binary truth (reference BEE, 2026-09-25)
-Present under `C:\\CPC\\servers\\\\`: `hands.exe`, `voice.exe`, `workflow.exe`, `manager.exe`, `programmer.exe`.
-**No** `autocache.exe`. Cache directory `C:\\CPC\\cache` exists. Do not invent a Cache MCP binary for v1.
+The Hands home is `HANDS_HOME`, else `CPC_ROOT` when that older variable is set, else `%LOCALAPPDATA%\AIWander\Hands` (or the current user's application-data directory plus `AIWander/Hands`).
+
+## Binaries
+A Toolbelt install home contains `servers/hands.exe`. Voice, Workflow, Manager, and Programmer are optional binaries in that same `servers` directory. There is no Cache MCP binary in v1. Do not invent one. Cache is a directory.
 
 ## Cache v1 rule (locked)
-- Collect and store `CPC_CACHE` (suggest `C:\\CPC\\cache`)
-- Skills / hooks / AGENTS: prefer Cache before network when an asset may be cached
+- Store Cache at `CPC_CACHE` when set, otherwise `<Hands home>/cache`
+- Skills / hooks: prefer Cache before network when an asset may be cached
 - Do **not** add `cpc-cache` to `mcp.json` until a real Cache MCP binary exists
-- Deferred wire example kept only as `mcp.cache.example.json` / labeled deferred
+- Deferred wire example kept only as `mcp.cache.example.json` (stdio, labeled deferred)
 
 ## Client profiles
 
 ### Cursor (this plugin — CPC-Toolbelt)
-- Wire MCP: `cpc-hands` only (v1)
-- Cache via `CPC_CACHE` + skills/hooks (not MCP)
+- Wire MCP: `cpc-hands` only (v1), stdio
+- Cache via the resolved Cache path + skills/hooks (not MCP)
 - Optional: Voice, Workflow, Manager
-- Programmer: **never** default; only via `add-programmer` skill if user asks
+- Programmer: **never** default; only via `add-programmer` skill if the user asks
 
-### Claude Desktop (installer future)
-- Wire MCP: Hands + **Programmer**
+### Claude Desktop
+- Wire MCP: Hands + **Programmer**, stdio, paths filled at install time
 - Cache path + skills (same v1 rule)
 - Optional: Voice, Workflow, Manager
+- Install face: [CPC-Toolbelt-Claude](https://github.com/AIWander/CPC-Toolbelt-Claude)
 
 ### Grok Build CLI (CPC-Toolbelt-Grok)
 - Skills/hooks namespaced `toolbelt-*` (alongside GrokCLI `cpc-*` protocol layer)
-- Wire MCP: Hands (+ optionals); Cache path only for v1
-- Programmer: only if user/agent is directed to add it
+- Wire MCP: Hands (+ optionals), stdio; Cache path only for v1
+- Programmer: only if the user or agent is directed to add it
+- Snippets live in that repo's `mcp-snippets/` and must use install-time variables, not a fixed machine path
 
-### GPT (local MCP host)
-- Same as Grok for local MCP wiring
+### Codex / GPT
+- Same stdio wiring as Grok for local MCP
 - Programmer available when directed
+- Install face: [CPC-Toolbelt-Codex](https://github.com/AIWander/CPC-Toolbelt-Codex)
 
 ## Freemium
 Free core capabilities (Hands, Cache path, Voice, Workflow, Manager Beta, Programmer) may ship free.
-**Do not** sell or name this pack as “autonomous” — that remains a separate wedge.
+**Do not** sell or name this pack as “autonomous” — that remains a separate product.
 
-## Transport: stdio vs shared-host HTTP
+## Transport
 
-- **Plugin / free-pack default (v1):** stdio — `${CPC_ROOT}/servers/<name>.exe` (Cursor `mcp.json`, Grok `mcp-snippets/`).
-- **Optional advanced:** shared-host HTTP when the `cpc` shared-mcp daemon is already running on the machine. Port map (owner-verified BEE): hands 7772, local 7773, manager 7774, workflow 7775, voice 7776 (may be cold), programmer 7777, ops 7778, stocks 7779. Autonomous **7771** is paid-wedge only — **never** include in free Toolbelt wire examples. See `mcp.shared-http.example.json` (example shape only; HTTP path must match local Cursor `mcp.json` on the daemon host — do not invent `/sse`).
-
+- **Plugin default:** stdio — `${HANDS_HOME}/servers/<name>.exe`, or the same command with the path written into the user's private MCP config at install time.
+- Plugin-local hook scripts use `${CURSOR_PLUGIN_ROOT}` (other clients may use `${CLAUDE_PLUGIN_ROOT}`).
+- Do not ship absolute paths, and do not publish a host port map. A private tunnel for remote use is covered by the `getting-started` skill.

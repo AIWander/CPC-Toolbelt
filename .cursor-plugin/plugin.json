@@ -23,22 +23,21 @@
   "variables": {
     "type": "object",
     "properties": {
+      "HANDS_HOME": {
+        "type": "string",
+        "title": "Hands install home",
+        "description": "Directory that contains servers/hands.exe. Leave empty to resolve %LOCALAPPDATA%\\AIWander\\Hands at runtime (the current user's application-data directory on other systems). Set this at install time so the stdio command can expand."
+      },
       "CPC_ROOT": {
         "type": "string",
-        "title": "CPC install root",
-        "description": "Windows path to CPC root (default C:\\\\CPC)",
-        "default": "C:\\\\CPC"
+        "title": "CPC install root (back-compat)",
+        "description": "Optional. Used as the Hands home only when HANDS_HOME is unset. Older installs can set this instead of HANDS_HOME. Leave empty on a new install."
       },
       "CPC_CACHE": {
         "type": "string",
-        "title": "Cache path",
-        "description": "Local Cache directory (v1 path + skills only; default C:\\\\CPC\\\\cache)",
-        "default": "C:\\\\CPC\\\\cache"
+        "title": "Cache path (back-compat)",
+        "description": "Optional local Cache directory. When empty, Cache is <Hands home>/cache. v1 is path + skills only — no Cache MCP server."
       }
-    },
-    "required": [
-      "CPC_ROOT",
-      "CPC_CACHE"
-    ]
+    }
   }
 }

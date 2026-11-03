@@ -1,27 +1,23 @@
 #!/usr/bin/env node
 /**
  * CPC Toolbelt doctor.
- * Checks CPC_ROOT, hands.exe, and CPC_CACHE.
- * If %CPC_ROOT%\shared-mcp exists, TCP-probes 127.0.0.1:7772 (Hands).
- * That probe is advisory. Path misses set ok:false. The process always
- * exits 0 (fail-open) and prints one JSON object.
- * Does not create directories, read Volumes, parse shared-mcp configs,
- * or contact any port other than 7772.
+ * Resolves the Hands home and Cache at runtime (see scripts/resolve-paths.cjs).
+ * Checks that home, servers/hands.exe, and the Cache directory exist.
+ * If <home>/shared-mcp exists and HANDS_SHARED_PORT is set, TCP-probes
+ * 127.0.0.1 on that port. The probe is advisory and has no default port.
+ * Path misses set ok:false. The process always exits 0 (fail-open) and
+ * prints one JSON object.
+ * Does not create directories, read Volumes, or open files under shared-mcp.
  */
 import fs from 'fs';
 import net from 'net';
 import path from 'path';
+import { createRequire } from 'module';
 
-const HANDS_PORT = 7772;
+const require = createRequire(import.meta.url);
+const { resolveToolbeltPaths } = require('./resolve-paths.cjs');
+
 const PROBE_MS = 800;
-
-function envPath(name, fallback) {
-  const raw = process.env[name];
-  if (raw && String(raw).trim()) {
-    return { path: path.resolve(String(raw).trim()), source: 'env' };
-  }
-  return { path: fallback, source: 'default' };
-}
 
 function existsDir(p) {
   try {
@@ -37,6 +33,14 @@ function existsFile(p) {
   } catch {
     return false;
   }
+}
+
+function sharedPort() {
+  const raw = process.env.HANDS_SHARED_PORT;
+  if (raw == null || String(raw).trim() === '') return null;
+  const n = Number(String(raw).trim());
+  if (!Number.isInteger(n) || n < 1 || n > 65535) return null;
+  return n;
 }
 
 function probeHands(port) {
@@ -72,47 +76,64 @@ function probeHands(port) {
 }
 
 async function run() {
-  const root = envPath('CPC_ROOT', 'C:\\CPC');
-  const cache = envPath('CPC_CACHE', 'C:\\CPC\\cache');
-  const handsPath = path.join(root.path, 'servers', 'hands.exe');
-  const marker = path.join(root.path, 'shared-mcp');
+  const resolved = resolveToolbeltPaths();
+  const handsPath = resolved.handsExe;
+  const marker = path.join(resolved.home.path, 'shared-mcp');
   const errors = [];
 
-  const rootExists = existsDir(root.path);
+  const homeExists = existsDir(resolved.home.path);
   const handsExists = existsFile(handsPath);
-  const cacheExists = existsDir(cache.path);
-  if (!rootExists) errors.push('CPC_ROOT is not a directory: ' + root.path);
+  const cacheExists = existsDir(resolved.cache.path);
+  if (!homeExists) errors.push('Hands home is not a directory: ' + resolved.home.path);
   if (!handsExists) errors.push('hands.exe missing: ' + handsPath);
-  if (!cacheExists) errors.push('CPC_CACHE is not a directory: ' + cache.path);
+  if (!cacheExists) errors.push('Cache directory is missing: ' + resolved.cache.path);
 
-  const sharedPresent = rootExists && existsDir(marker);
+  const sharedPresent = homeExists && existsDir(marker);
+  const port = sharedPort();
   let probe;
   if (!sharedPresent) {
-    probe = { host: '127.0.0.1', port: HANDS_PORT, status: 'skipped', error: null };
+    probe = { host: '127.0.0.1', port: port, status: 'skipped', error: null };
+  } else if (port == null) {
+    probe = {
+      host: '127.0.0.1',
+      port: null,
+      status: 'skipped',
+      error: 'HANDS_SHARED_PORT unset or not a TCP port',
+    };
   } else {
     try {
-      probe = await probeHands(HANDS_PORT);
+      probe = await probeHands(port);
     } catch (err) {
       probe = {
         host: '127.0.0.1',
-        port: HANDS_PORT,
+        port,
         status: 'closed',
         error: err && err.message ? err.message : 'probe failed',
       };
     }
   }
 
+  const homeReport = {
+    path: resolved.home.path,
+    source: resolved.home.source,
+    exists: homeExists,
+  };
   const report = {
     ok: errors.length === 0,
     fail_open: true,
-    cpc_root: { path: root.path, source: root.source, exists: rootExists },
+    hands_home: homeReport,
+    cpc_root: { ...homeReport, back_compat: true },
     hands_exe: {
       path: handsPath,
       exists: handsExists,
       spawn: handsPath,
       args: [],
     },
-    cpc_cache: { path: cache.path, source: cache.source, exists: cacheExists },
+    cpc_cache: {
+      path: resolved.cache.path,
+      source: resolved.cache.source,
+      exists: cacheExists,
+    },
     shared_host: {
       present: sharedPresent,
       marker,
@@ -121,8 +142,9 @@ async function run() {
     },
     errors,
     notes: [
+      'Hands home is HANDS_HOME, else CPC_ROOT, else the per-user AIWander/Hands directory.',
       'Cache v1 is a directory plus skills/hooks. This check does not look for a Cache MCP server.',
-      'A closed or skipped 7772 probe does not fail the doctor.',
+      'MCP servers in this pack are stdio. A shared-host probe runs only when HANDS_SHARED_PORT is set, and it never fails the doctor.',
     ],
   };
   process.stdout.write(JSON.stringify(report, null, 2) + '\n');
