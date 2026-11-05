@@ -5,6 +5,7 @@
  * Always permission: allow. Never deny.
  */
 const fs = require('fs');
+const { resolveToolbeltPaths } = require('../scripts/resolve-paths.cjs');
 
 const NETWORKISH =
   /fetch|download|http|https|url|web|browser_navigate|browser_agent|pull|clone|curl|wget|install_skill|get_file|asset/i;
@@ -31,7 +32,7 @@ function main() {
     const tool = String(input.tool_name || '');
     const tip = String(input.tool_input || '');
     const blob = server + ' ' + tool + ' ' + tip;
-    const cache = process.env.CPC_CACHE || 'C:\\CPC\\cache';
+    const cache = resolveToolbeltPaths().cache.path;
 
     const out = { permission: 'allow' };
     if (NETWORKISH.test(blob)) {

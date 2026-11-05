@@ -5,6 +5,7 @@
  * Fail-open. Never blocks submission.
  */
 const fs = require('fs');
+const { resolveToolbeltPaths } = require('../scripts/resolve-paths.cjs');
 
 const LOOKUP_RE = /\b(download|fetch|install|get|find|locate|lookup|search|skill|asset|file|template|logo|binary|exe|mcp|cache|copy|pull|clone)\b/i;
 
@@ -27,7 +28,7 @@ function main() {
   try {
     const input = readInput();
     const prompt = String(input.prompt || input.content || input.message || '');
-    const cache = process.env.CPC_CACHE || 'C:\\CPC\\cache';
+    const cache = resolveToolbeltPaths().cache.path;
 
     if (prompt && LOOKUP_RE.test(prompt)) {
       const ctx =

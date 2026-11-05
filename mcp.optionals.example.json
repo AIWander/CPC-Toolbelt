@@ -1,16 +1,19 @@
 {
-  "_comment": "Merge opted servers only. Binary names verified on reference BEE CPC install.",
+  "_comment": "Merge opted servers only. stdio only. ${HANDS_HOME} is filled at install time (or leave it for the runtime default). Never commit an absolute path.",
   "mcpServers": {
     "cpc-voice": {
-      "command": "${CPC_ROOT}/servers/voice.exe",
+      "type": "stdio",
+      "command": "${HANDS_HOME}/servers/voice.exe",
       "args": []
     },
     "cpc-workflow": {
-      "command": "${CPC_ROOT}/servers/workflow.exe",
+      "type": "stdio",
+      "command": "${HANDS_HOME}/servers/workflow.exe",
       "args": []
     },
     "cpc-manager": {
-      "command": "${CPC_ROOT}/servers/manager.exe",
+      "type": "stdio",
+      "command": "${HANDS_HOME}/servers/manager.exe",
       "args": []
     }
   }

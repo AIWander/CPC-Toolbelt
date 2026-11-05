@@ -4,10 +4,12 @@ Cursor Plugins can ship `hooks/hooks.json`. Events used here:
 
 | Event | Script | Behavior |
 |---|---|---|
-| `sessionStart` | `session_start.js` | Inject Toolbelt context; set env defaults for `CPC_ROOT` / `CPC_CACHE` |
+| `sessionStart` | `session_start.js` | Inject Toolbelt context; set `HANDS_HOME` / `CPC_CACHE` only when unset, from runtime resolution |
 | `beforeSubmitPrompt` | `cache_first_prompt.js` | Soft cache-first `additional_context` on lookup-like prompts; always `continue: true` |
 | `beforeMCPExecution` | `cache_before_mcp.js` | Soft `agent_message` nudge for network-ish tools; **always** `permission: allow` |
 | `stop` | `stop_doctor_nudge.js` | Only if `CPC_TOOLBELT_DOCTOR_ON_STOP=1`; `loop_limit: 0` |
+
+Runtime paths live in `scripts/resolve-paths.cjs`. Home is `HANDS_HOME`, else `CPC_ROOT`, else `%LOCALAPPDATA%\AIWander\Hands`. Cache is `CPC_CACHE`, else `<home>/cache`. There is no machine-specific fallback.
 
 Commands use `node ${CURSOR_PLUGIN_ROOT}/hooks/...` because plugin hooks run with cwd = opened project, not the plugin install dir.
 

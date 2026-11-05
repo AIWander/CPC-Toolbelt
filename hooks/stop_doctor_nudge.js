@@ -28,7 +28,7 @@ function main() {
       process.stdout.write(
         JSON.stringify({
           followup_message:
-            'Run the toolbelt-doctor skill to verify hands.exe under CPC_ROOT/servers and that CPC_CACHE exists.',
+            'Run the toolbelt-doctor skill to verify hands.exe under the Hands home servers directory and that the Cache directory exists.',
         }) + '\n'
       );
       return;

@@ -1,14 +1,15 @@
 # Changelog
 
 ## Unreleased
-- Docs: `RELATIONSHIP.md` lane map; `mcp.shared-http.example.json` shared-host port map (no autonomous/7771 in free wire); PACK_MATRIX transport note.
-- Doctor: `scripts/toolbelt-doctor.mjs` checks `CPC_ROOT`, `hands.exe`, and `CPC_CACHE`. If `%CPC_ROOT%\shared-mcp` exists it TCP-probes `127.0.0.1:7772` and stays fail-open when that port is closed. No Volumes read and no port 7771.
-- README Related links `RELATIONSHIP.md`.
+- Paths resolve at runtime: `HANDS_HOME`, else `CPC_ROOT`, else `%LOCALAPPDATA%\AIWander\Hands` (platform user-data dir when `LOCALAPPDATA` is unset). `CPC_CACHE` remains an optional override; otherwise Cache is `<Hands home>/cache`. No machine-specific fallback.
+- MCP entries are stdio. Commands use `${HANDS_HOME}` (filled at install time). Removed the shared-host port example.
+- `scripts/validate.mjs` rejects hard-coded machine paths instead of requiring one.
+- Added the `getting-started` skill: call `hands_setup_status` first; walk through a private tunnel only when needed. The user signs in themselves. No stored keys. No public link by default.
 
 ## 0.1.0 — 2026-09-25
 - Initial publishable CPC Toolbelt Cursor plugin (root-as-plugin).
 - MCP: `cpc-hands` only.
-- Cache v1: `CPC_CACHE` path + skills/hooks (default suggest `C:\CPC\cache`); no `cpc-cache` MCP.
+- Cache v1: `CPC_CACHE` path + skills/hooks; no `cpc-cache` MCP.
 - Hooks: sessionStart, beforeSubmitPrompt, beforeMCPExecution, stop (doctor nudge gated).
 - Skills: toolbelt-setup, toolbelt-doctor, cache-first, enable-optional, add-programmer, hands-check.
 - Programmer never default on Cursor.
