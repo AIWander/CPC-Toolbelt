@@ -237,7 +237,7 @@ for (const [script, stdin] of [
 
 function doctorEnv(extra) {
   const env = { ...process.env };
-  for (const key of ['HANDS_HOME', 'CPC_ROOT', 'CPC_CACHE', 'HANDS_SHARED_PORT', 'LOCALAPPDATA']) {
+  for (const key of ['HANDS_HOME', 'CPC_ROOT', 'CPC_CACHE', 'HANDS_SHARED_PORT', 'LOCALAPPDATA', 'XDG_DATA_HOME']) {
     delete env[key];
   }
   return { ...env, ...extra };
@@ -338,6 +338,22 @@ function doctorEnv(extra) {
     if (defaultsJson.ok !== false) errors.push('missing default directories must report ok:false');
   } catch {
     errors.push('toolbelt-doctor.mjs did not emit JSON for the default home');
+  }
+
+  if (process.platform === 'win32') {
+    const fromProfile = spawnSync(process.execPath, [doctor], {
+      encoding: 'utf8',
+      timeout: 5000,
+      env: doctorEnv({ XDG_DATA_HOME: local }),
+    });
+    try {
+      const expectedHome = path.join(os.homedir(), 'AppData', 'Local', 'AIWander', 'Hands');
+      if (JSON.parse(fromProfile.stdout).hands_home?.path !== expectedHome) {
+        errors.push('Windows must use the profile AppData/Local path when LOCALAPPDATA is unset');
+      }
+    } catch {
+      errors.push('toolbelt-doctor.mjs did not emit JSON for the Windows profile default');
+    }
   }
 
   const bad = spawnSync(process.execPath, [doctor], {

@@ -37,6 +37,9 @@ function expandEnv(input) {
 function defaultHandsHome() {
   const local = nonempty('LOCALAPPDATA');
   if (local) return path.join(local, 'AIWander', 'Hands');
+  if (process.platform === 'win32') {
+    return path.join(os.homedir(), 'AppData', 'Local', 'AIWander', 'Hands');
+  }
   if (process.platform === 'darwin') {
     return path.join(os.homedir(), 'Library', 'Application Support', 'AIWander', 'Hands');
   }
